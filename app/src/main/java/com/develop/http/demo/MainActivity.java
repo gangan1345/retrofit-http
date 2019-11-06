@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.develop.http.Request;
 import com.develop.http.callback.HttpSimpleCallBack;
@@ -29,7 +30,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 HttpService.get().getPayList(new HttpSimpleCallBack<List<Pay>>() {
                     @Override
                     public void onHttpSuccess(Request request, List<Pay> model) {
+                        Toast.makeText(getBaseContext(), model == null ? "null" : model.size() + "", Toast.LENGTH_LONG).show();
+                    }
 
+                    @Override
+                    public void onHttpFailed(Request request, int errorCode, String message) {
+                        super.onHttpFailed(request, errorCode, message);
+                        Toast.makeText(getBaseContext(), String.format("code=%d, message=%s", errorCode, message), Toast.LENGTH_LONG).show();
                     }
                 });
                 break;

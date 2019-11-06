@@ -17,7 +17,7 @@ public class MainApplication extends Application {
         super.onCreate();
         instance = this;
 
-        RetrofitHttp.init(this, new HttpParams());
+        RetrofitHttp.init(this, new HttpParams(), BuildConfig.LOG_ENABLE).builder();
     }
 
     public static MainApplication getInstance() {

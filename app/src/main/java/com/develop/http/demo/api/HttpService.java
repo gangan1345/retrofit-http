@@ -15,6 +15,10 @@ public class HttpService {
     private static HttpService instance;
     private ApiService apiService;
 
+    private HttpService(){
+
+    }
+
     public static HttpService get(){
         synchronized (HttpService.class){
             if (instance == null) {

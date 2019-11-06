@@ -8,8 +8,16 @@ import com.develop.http.BuildConfig;
  * @author Angus
  */
 public class LogUtils {
-    public static final boolean LOG_ENABLE = BuildConfig.LOG_ENABLE;
+    public static boolean LOG_ENABLE = BuildConfig.LOG_ENABLE;
     public static final String TAG = "httplog";
+
+    /**
+     * set log debug
+     * @param debug
+     */
+    public static void setLogEnable(boolean debug) {
+        LOG_ENABLE = debug;
+    }
 
     /**
      * verbose log

@@ -10,6 +10,7 @@ import com.develop.http.callback.HttpParamsInterface;
 import com.develop.http.interceptor.HttpCommonParamInterceptor;
 import com.develop.http.interceptor.HttpLogInterceptor;
 import com.develop.http.interceptor.NetworkCacheInterceptor;
+import com.develop.http.utils.LogUtils;
 import com.develop.http.utils.NetworkUtils;
 
 import java.io.File;
@@ -31,13 +32,11 @@ import rx.schedulers.Schedulers;
  * @author Angus
  */
 public class RetrofitHttp {
-    /** 请求超时 */
-    public static final int CONNECT_TIME_OUT = 15 * 1000;
-    /** 等待数据超时 */
-    public static final int SO_TIME_OUT = 30 * 1000;
-    /**
-     * retrofit缓存文件夹大小：10M
-     */
+    /** 请求超时时间 (秒)*/
+    public static int CONNECT_TIME_OUT = 15;
+    /** 读写数据超时时间 (秒)*/
+    public static int READ_WRITE_TIME_OUT = 30;
+    /** 缓存文件夹大小：10M */
     private static final int RETROFIT_CACHEDIR_SIZE = 10 * 1024 * 1024;
 
     private HttpConfigBuilder mHttpConfigBuilder;
@@ -56,22 +55,65 @@ public class RetrofitHttp {
         return mRetrofitHttp;
     }
 
+    /**
+     * 初始化方法
+     * @param context 上下文
+     * @param httpParamsInterface http公共参数
+     * @param debug 日志开关
+     * @return
+     */
+    public static RetrofitHttp init(Context context, HttpParamsInterface httpParamsInterface, boolean debug) {
+        HttpConfigBuilder builder = HttpConfigBuilder.builder(context).config(httpParamsInterface);
+        return RetrofitHttp.init(builder, debug);
+    }
+
+    /**
+     * 初始化方法
+     * @param mHttpConfigBuilder http参数配置
+     * @param debug 日志开关
+     * @return
+     */
+    public static RetrofitHttp init(HttpConfigBuilder mHttpConfigBuilder, boolean debug) {
+        return RetrofitHttp.get().httpConfigBuilder(mHttpConfigBuilder).log(debug);
+    }
+
+    /**
+     * set http config
+     * @param mHttpConfigBuilder
+     * @return
+     */
+    public RetrofitHttp httpConfigBuilder(HttpConfigBuilder mHttpConfigBuilder) {
+        this.mHttpConfigBuilder = mHttpConfigBuilder;
+        return this;
+    }
+
+    /**
+     * builder
+     * init 之后调用
+     * @return
+     */
     public RetrofitHttp builder(){
         mCommonApi = getApi(CommonApi.class);
         return this;
     }
 
-    public static RetrofitHttp init(HttpConfigBuilder mHttpConfigBuilder) {
-        return RetrofitHttp.get().httpConfigBuilder(mHttpConfigBuilder).builder();
+    /**
+     * set log debug
+     * @param debug
+     */
+    public RetrofitHttp log(boolean debug) {
+        LogUtils.setLogEnable(debug);
+        return this;
     }
 
-    public static RetrofitHttp init(Context context, HttpParamsInterface httpParamsInterface) {
-        HttpConfigBuilder builder = HttpConfigBuilder.builder(context).config(httpParamsInterface);
-        return RetrofitHttp.init(builder);
-    }
-
-    public RetrofitHttp httpConfigBuilder(HttpConfigBuilder mHttpConfigBuilder) {
-        this.mHttpConfigBuilder = mHttpConfigBuilder;
+    /**
+     * set time out
+     * @param connectTimeoutSeconds
+     * @param readWriteTimeoutSeconds
+     */
+    public RetrofitHttp timeout(int connectTimeoutSeconds, int readWriteTimeoutSeconds) {
+        CONNECT_TIME_OUT = connectTimeoutSeconds;
+        READ_WRITE_TIME_OUT = readWriteTimeoutSeconds;
         return this;
     }
 
@@ -79,9 +121,9 @@ public class RetrofitHttp {
         if (mOkHttpClient == null) {
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
             // timeout
-            httpClient.connectTimeout(CONNECT_TIME_OUT, TimeUnit.MILLISECONDS);
-            httpClient.writeTimeout(SO_TIME_OUT, TimeUnit.MILLISECONDS);
-            httpClient.readTimeout(SO_TIME_OUT, TimeUnit.MILLISECONDS);
+            httpClient.connectTimeout(CONNECT_TIME_OUT, TimeUnit.SECONDS);
+            httpClient.writeTimeout(READ_WRITE_TIME_OUT, TimeUnit.SECONDS);
+            httpClient.readTimeout(READ_WRITE_TIME_OUT, TimeUnit.SECONDS);
             // cache
             File httpCacheDirectory = new File(mHttpConfigBuilder.getContext().getCacheDir(), "okhttp_cache");
             httpClient.cache(new Cache(httpCacheDirectory, RETROFIT_CACHEDIR_SIZE));

@@ -48,6 +48,7 @@ public class HttpResult<T> extends AbsHttpResult<T> {
         this.data = data;
     }
 
+    @Override
     public boolean isSuccess(){
         return code == 1;
     }
