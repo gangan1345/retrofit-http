@@ -14,6 +14,8 @@ import rx.Observable;
 
 /**
  * @author Angus
+ *
+ * @BaseUrl(BuildConfig.API_SERVER_URL) 针对不同的api 类可以各自设置baseUrl
  */
 public interface ApiService {
 

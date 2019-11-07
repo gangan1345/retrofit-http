@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.develop.http.api.BaseUrl;
 import com.develop.http.api.CommonApi;
 import com.develop.http.callback.HttpCallBack;
 import com.develop.http.callback.HttpParamsInterface;
@@ -43,6 +44,7 @@ public class RetrofitHttp {
     private OkHttpClient mOkHttpClient;
     private HashMap<String, Object> mServiceMap = new HashMap<>();
     private CommonApi mCommonApi;
+    private boolean mSslEnable;
 
     private volatile static RetrofitHttp mRetrofitHttp;
 
@@ -117,6 +119,16 @@ public class RetrofitHttp {
         return this;
     }
 
+    /**
+     * ssl enable
+     * @param enable
+     * @return
+     */
+    public RetrofitHttp ssl(boolean enable) {
+        mSslEnable = enable;
+        return this;
+    }
+
     public OkHttpClient getOkHttpClient() {
         if (mOkHttpClient == null) {
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
@@ -132,15 +144,16 @@ public class RetrofitHttp {
             // network
             httpClient.addInterceptor(new NetworkCacheInterceptor(mHttpConfigBuilder));
             // log
-            if (BuildConfig.LOG_ENABLE) {
+            if (LogUtils.LOG_ENABLE) {
                 httpClient.addInterceptor(new HttpLogInterceptor());
             }
             //retry when fail
             httpClient.retryOnConnectionFailure(true);
-
-            //todo SSL证书
-//            httpClient.sslSocketFactory(HttpsFactroy.getSSLSocketFactory());
-//            httpClient.hostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            // SSL证书
+            if (mSslEnable) {
+                httpClient.sslSocketFactory(HttpsFactroy.getSSLSocketFactory());
+                httpClient.hostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            }
 
             mOkHttpClient = httpClient.build();
         }
@@ -179,17 +192,18 @@ public class RetrofitHttp {
         if (mHttpConfigBuilder != null) {
             baseUrl = mHttpConfigBuilder.getBaseUrl();
         }
-        /*
+
+        // 每个api service class 可自定义baseUrl
         try {
-            Field field1 = serviceClass.getField("baseUrl");
-            baseUrl = (String) field1.get(serviceClass);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.getMessage();
+            boolean bool = serviceClass.isAnnotationPresent(BaseUrl.class);
+            if (bool) {
+                BaseUrl field = serviceClass.getAnnotation(BaseUrl.class);
+                baseUrl = field.value();
+                LogUtils.i(serviceClass.getSimpleName() + " baseUrl：" + baseUrl);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        */
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)

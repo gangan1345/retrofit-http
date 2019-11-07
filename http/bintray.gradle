@@ -8,7 +8,7 @@ publish {
     userOrg = 'gangan1345'  // bintray注册的用户名
     groupId = 'pub.gan.develop'
     artifactId = 'retrofit-http'
-    publishVersion = '2.6.1'
+    publishVersion = '2.6.1.1'
     website = 'https://github.com/gangan1345/retrofit-http'
     desc = 'retrofit2 okhttp3 rxandroid'
 }
@@ -19,15 +19,11 @@ repositories {
     }
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
-
 tasks.withType(Javadoc) {
     options {
         encoding "UTF-8"
         charSet 'UTF-8'
-        links "http://docs.oracle.com/javase/7/docs/api"
+        links "http://docs.oracle.com/javase/8/docs/api"
     }
 }
 
