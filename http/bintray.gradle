@@ -8,7 +8,7 @@ publish {
     userOrg = 'gangan1345'  // bintray注册的用户名
     groupId = 'pub.gan.develop'
     artifactId = 'retrofit-http'
-    publishVersion = '2.6.1.1'
+    publishVersion = '2.6.1.2'
     website = 'https://github.com/gangan1345/retrofit-http'
     desc = 'retrofit2 okhttp3 rxandroid'
 }
