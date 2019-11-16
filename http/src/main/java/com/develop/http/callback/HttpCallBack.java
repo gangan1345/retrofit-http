@@ -1,7 +1,5 @@
 package com.develop.http.callback;
 
-import com.develop.http.Request;
-
 /**
  * 网络请求回调， app业务使用此回调接收结果
  * @author Angus
@@ -9,11 +7,19 @@ import com.develop.http.Request;
 
 public interface HttpCallBack<M>  {
 
-    void onHttpStart(Request request);
+    void onStart();
 
-    void onHttpSuccess(Request request, M model);
+    void onSuccess(M model);
 
-    void onHttpFailed(Request request, int errorCode, String message);
+    void onFailed(int errorCode, String message);
 
-    void onHttpCompleted(Request request);
+    void onCompleted();
+
+    /**
+     * 文件上传下载进度
+     * @param progress
+     * @param total
+     * @param completed
+     */
+    void onProgress(long progress, long total, boolean completed);
 }

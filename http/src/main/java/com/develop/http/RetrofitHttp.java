@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.develop.http.api.BaseUrl;
 import com.develop.http.api.CommonApi;
+import com.develop.http.api.CommonApiRequest;
 import com.develop.http.callback.HttpCallBack;
 import com.develop.http.callback.HttpParamsInterface;
 import com.develop.http.interceptor.HttpCommonParamInterceptor;
@@ -43,7 +44,7 @@ public class RetrofitHttp {
     private HttpConfigBuilder mHttpConfigBuilder;
     private OkHttpClient mOkHttpClient;
     private HashMap<String, Object> mServiceMap = new HashMap<>();
-    private CommonApi mCommonApi;
+    private CommonApiRequest mCommonApiRequest;
     private boolean mSslEnable;
 
     private volatile static RetrofitHttp mRetrofitHttp;
@@ -95,7 +96,7 @@ public class RetrofitHttp {
      * @return
      */
     public RetrofitHttp builder(){
-        mCommonApi = getApi(CommonApi.class);
+        builderCommonApiRequest();
         return this;
     }
 
@@ -127,6 +128,29 @@ public class RetrofitHttp {
     public RetrofitHttp ssl(boolean enable) {
         mSslEnable = enable;
         return this;
+    }
+
+    /**
+     * get base url
+     * @return
+     */
+    public String getBaseUrl(){
+        String baseUrl = "";
+        if (mHttpConfigBuilder != null) {
+            baseUrl = mHttpConfigBuilder.getBaseUrl();
+        }
+        return baseUrl;
+    }
+
+    /**
+     * 公共api请求
+     * @return
+     */
+    public CommonApiRequest builderCommonApiRequest() {
+        if (mCommonApiRequest == null) {
+            mCommonApiRequest = new CommonApiRequest(getApi(CommonApi.class));
+        }
+        return mCommonApiRequest;
     }
 
     public OkHttpClient getOkHttpClient() {
@@ -188,10 +212,7 @@ public class RetrofitHttp {
 
 
     private <S> S createApi(Class<S> serviceClass, OkHttpClient client) {
-        String baseUrl = "";
-        if (mHttpConfigBuilder != null) {
-            baseUrl = mHttpConfigBuilder.getBaseUrl();
-        }
+        String baseUrl = getBaseUrl();
 
         // 每个api service class 可自定义baseUrl
         try {
@@ -303,6 +324,14 @@ public class RetrofitHttp {
      */
     public static <M> Request requestR(@NonNull Observable<M> observable, HttpCallBack<M> callBack){
         return Request.requestR(observable, callBack);
+    }
+
+    /**
+     * 公共请求方法类
+     * @return
+     */
+    public static CommonApiRequest commonApi(){
+        return get().builderCommonApiRequest();
     }
 
 }

@@ -15,7 +15,7 @@ import rx.Subscriber;
 
 
 /**
- * http 请求, app 主要调度HttpTask 来完成网络请求
+ * http 请求
  * @author Angus
  */
 
@@ -41,7 +41,7 @@ public class Request<M> {
         onHttpStart();
 
         if (!RetrofitHttp.get().isNetworkAvailable()) {
-            onHttpFailed(HttpErrorCode.CODE_NO_NETWORK, "");
+            onHttpFailed(HttpErrorCode.CODE_NO_NETWORK, HttpErrorCode.getCodeMessage(HttpErrorCode.CODE_NO_NETWORK));
             return this;
         }
 
@@ -58,7 +58,7 @@ public class Request<M> {
         onHttpStart();
 
         if (!RetrofitHttp.get().isNetworkAvailable()) {
-            onHttpFailed(HttpErrorCode.CODE_NO_NETWORK, "");
+            onHttpFailed(HttpErrorCode.CODE_NO_NETWORK, HttpErrorCode.getCodeMessage(HttpErrorCode.CODE_NO_NETWORK));
             return this;
         }
 
@@ -73,25 +73,25 @@ public class Request<M> {
 
     public void onHttpStart() {
         if (null != mCallBack) {
-            mCallBack.onHttpStart(this);
+            mCallBack.onStart();
         }
     }
 
     public void onHttpSuccess(final M model) {
         if (null != mCallBack) {
-            mCallBack.onHttpSuccess(this, model);
+            mCallBack.onSuccess(model);
         }
     }
 
     public void onHttpFailed(final int errorCode, final String message) {
         if (null != mCallBack) {
-            mCallBack.onHttpFailed(this, errorCode, message);
+            mCallBack.onFailed(errorCode, message);
         }
     }
 
     public void onHttpCompleted() {
         if (null != mCallBack) {
-            mCallBack.onHttpCompleted(this);
+            mCallBack.onCompleted();
         }
     }
 

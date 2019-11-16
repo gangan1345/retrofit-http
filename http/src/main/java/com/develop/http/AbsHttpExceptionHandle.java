@@ -1,11 +1,14 @@
 package com.develop.http;
 
 import com.develop.http.utils.LogUtils;
+import com.google.gson.JsonParseException;
 
 import org.apache.http.conn.ConnectTimeoutException;
+import org.json.JSONException;
 
 import java.net.ConnectException;
 import java.net.SocketException;
+import java.text.ParseException;
 
 import retrofit2.adapter.rxjava.HttpException;
 
@@ -50,11 +53,11 @@ public class AbsHttpExceptionHandle {
             ex.message = resultException.message;
             message = "["+resultException.code+"]" + message;
         } else if (e instanceof ConnectException || e instanceof SocketException) {
-            ex = new ResponeThrowable(e, HttpErrorCode.CODE_NO_NETWORK);
-            ex.message = "无法连接服务器，请检查网络";
+            ex = new ResponeThrowable(e, HttpErrorCode.CODE_NO_NETWORK, HttpErrorCode.getCodeMessage(HttpErrorCode.CODE_NO_NETWORK));
         } else if (e instanceof java.net.SocketTimeoutException || e instanceof ConnectTimeoutException) {
-            ex = new ResponeThrowable(e, HttpErrorCode.CODE_TIMEOUT);
-            ex.message = defaultMsg;
+            ex = new ResponeThrowable(e, HttpErrorCode.CODE_TIMEOUT, HttpErrorCode.getCodeMessage(HttpErrorCode.CODE_TIMEOUT));
+        } else if (e instanceof JSONException || e instanceof JsonParseException || e instanceof ParseException) {
+            ex = new ResponeThrowable(e, HttpErrorCode.CODE_PARSE_ERROR, HttpErrorCode.getCodeMessage(HttpErrorCode.CODE_PARSE_ERROR));
         } else {
             ex = new ResponeThrowable(e, HttpErrorCode.CODE_FAILURE);
             ex.message = defaultMsg;
@@ -70,6 +73,12 @@ public class AbsHttpExceptionHandle {
         public ResponeThrowable(Throwable throwable, int code) {
             super(throwable);
             this.code = code;
+        }
+
+        public ResponeThrowable(Throwable throwable, int code, String message) {
+            super(throwable);
+            this.code = code;
+            this.message = message;
         }
     }
 

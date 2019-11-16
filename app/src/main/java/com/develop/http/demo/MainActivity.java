@@ -1,17 +1,14 @@
 package com.develop.http.demo;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import com.develop.http.Request;
-import com.develop.http.callback.HttpSimpleCallBack;
-import com.develop.http.demo.api.HttpService;
-import com.develop.http.demo.model.Pay;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.List;
+import com.develop.http.RetrofitHttp;
+import com.develop.http.callback.HttpSimpleCallBack;
+import com.develop.http.demo.model.Version;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -27,18 +24,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.get_btn:
-                HttpService.get().getPayList(new HttpSimpleCallBack<List<Pay>>() {
-                    @Override
-                    public void onHttpSuccess(Request request, List<Pay> model) {
-                        Toast.makeText(getBaseContext(), model == null ? "null" : model.size() + "", Toast.LENGTH_LONG).show();
-                    }
+//                HttpService.get().getPayList(new HttpSimpleCallBack<List<Pay>>() {
+//                    @Override
+//                    public void onSuccess(Request request, List<Pay> model) {
+//                        Toast.makeText(getBaseContext(), model == null ? "null" : model.size() + "", Toast.LENGTH_LONG).show();
+//                    }
+//
+//                    @Override
+//                    public void onFailed(Request request, int errorCode, String message) {
+//                        super.onHttpFailed(request, errorCode, message);
+//                        Toast.makeText(getBaseContext(), String.format("code=%d, message=%s", errorCode, message), Toast.LENGTH_LONG).show();
+//                    }
+//                });
 
+                RetrofitHttp.commonApi().getFullPath(this, "http://www.lebole5.com/systems/getVersionAndroid", new HttpSimpleCallBack<Version>() {
                     @Override
-                    public void onHttpFailed(Request request, int errorCode, String message) {
-                        super.onHttpFailed(request, errorCode, message);
-                        Toast.makeText(getBaseContext(), String.format("code=%d, message=%s", errorCode, message), Toast.LENGTH_LONG).show();
+                    public void onSuccess(Version model) {
+                        Toast.makeText(getBaseContext(), model == null ? "null" : model.version + "", Toast.LENGTH_LONG).show();
                     }
                 });
+
+//                RetrofitHttp.commonApi().download("http://file.gan.pub/test/201911/15/354032b5efd8499ba66073aed39c9629.png",
+//                        Environment.getExternalStorageDirectory().getAbsolutePath() + "/A.png", new DownloadFileListener(){
+//                            @Override
+//                            public void onProgress(long progress, long total, boolean completed) {
+//                                super.onProgress(progress, total, completed);
+//                                LogUtils.i(String.format("progress=%s, total=%s", progress, total));
+//                            }
+//                        });
                 break;
         }
     }
