@@ -100,23 +100,29 @@ public interface CommonApi {
     @Multipart
     @POST("{path}")
     Observable<ResponseBody> uploadFile(@Path(value = "path", encoded = true) String url,
-                                        @Part("description") RequestBody description, @Part MultipartBody.Part file);
+                                        @QueryMap Map<String, Object> queryMap,
+                                        @Part("description") RequestBody description,
+                                        @Part MultipartBody.Part file);
 
     @Multipart
     @POST
     Observable<ResponseBody> uploadFileFullPath(@Url String url,
-                                                @Part("description") RequestBody description, @Part MultipartBody.Part file);
+                                                @QueryMap Map<String, Object> queryMap,
+                                                @Part("description") RequestBody description,
+                                                @Part MultipartBody.Part file);
 
     @Multipart
     @POST("{path}")
     Observable<ResponseBody> uploadFiles(
             @Path(value = "path", encoded = true) String url,
+            @QueryMap Map<String, Object> queryMap,
             @PartMap Map<String, RequestBody> maps);
 
     @Multipart
     @POST
     Observable<ResponseBody> uploadFilesFullPath(
             @Url String url,
+            @QueryMap Map<String, Object> queryMap,
             @PartMap() Map<String, RequestBody> maps);
 
     //支持大文件

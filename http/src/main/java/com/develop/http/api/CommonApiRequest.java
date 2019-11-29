@@ -1,6 +1,7 @@
 package com.develop.http.api;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import com.develop.http.HttpErrorCode;
 import com.develop.http.RetrofitHttp;
@@ -10,6 +11,7 @@ import com.develop.http.download.DownloadFileListener;
 import com.develop.http.download.DownloadInfo;
 import com.develop.http.download.DownloadManager;
 import com.develop.http.upload.UploadFileRequestBody;
+import com.develop.http.utils.BitmapUtils;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -109,53 +111,111 @@ public class CommonApiRequest {
         request(context, mCommonApi.doPostFullPath(url, parameters), callBack);
     }
 
-    public <M> void uploadFile(Context context, String url, String filePath, String fileDes, final HttpSimpleCallBack<M> callBack) {
-        uploadFile(context, url, filePath, fileDes, false, callBack);
+    public <M> void uploadFile(Context context, String url, Bitmap bitmap, String fileName, String fileDes, Map<String, Object> queryMap, final HttpSimpleCallBack<M> callBack) {
+        byte[] file = BitmapUtils.bitmap2Bytes(bitmap);
+        uploadFile(context, url, file, fileName, fileDes, queryMap, false, callBack);
     }
 
-    public <M> void uploadFileFullPath(Context context, String url, String filePath, String fileDes, final HttpSimpleCallBack<M> callBack) {
-        uploadFile(context, url, filePath, fileDes, true, callBack);
+    public <M> void uploadFileFullPath(Context context, String url, Bitmap bitmap, String fileName, String fileDes, Map<String, Object> queryMap, final HttpSimpleCallBack<M> callBack) {
+        byte[] file = BitmapUtils.bitmap2Bytes(bitmap);
+        uploadFile(context, url, file, fileName, fileDes, queryMap, true, callBack);
     }
 
-    private  <M> void uploadFile(Context context, String url, String filePath, String fileDes, boolean isFullPath, final HttpSimpleCallBack<M> callBack) {
-        final File file = new File(filePath);
-        if (!file.exists()) {
-            return;
-        }
+    public <M> void uploadFile(Context context, String url, byte[] file, String fileName, String fileDes, Map<String, Object> queryMap, final HttpSimpleCallBack<M> callBack) {
+        uploadFile(context, url, file, fileName, fileDes, queryMap, false, callBack);
+    }
 
+    public <M> void uploadFileFullPath(Context context, String url, byte[] file, String fileName, String fileDes, Map<String, Object> queryMap, final HttpSimpleCallBack<M> callBack) {
+        uploadFile(context, url, file, fileName, fileDes, queryMap, true, callBack);
+    }
+
+    private <M> void uploadFile(Context context, String url, final byte[] file, String fileName, String fileDes, Map<String, Object> queryMap, boolean isFullPath, final HttpSimpleCallBack<M> callBack) {
         RequestBody description = RequestBody.create(MediaType.parse("multipart/form-data; charset=utf-8"), fileDes);
-//        RequestBody requestBody = UploadFileRequestBody.create(MediaType.parse("multipart/form-data"), file);
+        // RequestBody requestBody = UploadFileRequestBody.create(MediaType.parse("multipart/form-data"), file);
         UploadFileRequestBody requestBody = new UploadFileRequestBody(file, new TransformProgressListener() {
-            private long curUploadProgress = 0;
 
             @Override
             public void onProgress(long progress, long total, boolean completed) {
                 if (completed) {
-                    curUploadProgress += total;
+                    progress = total;
                 }
-                callBack.onProgress(curUploadProgress + (progress), file.length(), curUploadProgress + (progress) == file.length());
+                callBack.onProgress(progress, total, completed);
             }
         });
-        MultipartBody.Part part = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
+        MultipartBody.Part part = MultipartBody.Part.createFormData("file", fileName, requestBody);
+        if (queryMap == null) {
+            queryMap = new HashMap<>();
+        }
         if (isFullPath) {
-            request(context, mCommonApi.uploadFileFullPath(url, description, part), callBack);
+            request(context, mCommonApi.uploadFileFullPath(url, queryMap, description, part), callBack);
         } else {
-            request(context, mCommonApi.uploadFile(url, description, part), callBack);
+            request(context, mCommonApi.uploadFile(url, queryMap, description, part), callBack);
         }
     }
 
-    public  <M> void uploadFiles(Context context, String url, List<String> filePathList, final HttpSimpleCallBack<M> callBack) {
-        uploadFiles(context, url, filePathList, false, callBack);
+    public <M> void uploadFile(Context context, String url, String filePath, String fileDes, final HttpSimpleCallBack<M> callBack) {
+        uploadFile(context, url, filePath, fileDes, null, false, callBack);
     }
 
-    public  <M> void uploadFilesFullPath(Context context, String url, List<String> filePathList, final HttpSimpleCallBack<M> callBack) {
-        uploadFiles(context, url, filePathList, true, callBack);
+    public <M> void uploadFileFullPath(Context context, String url, String filePath, String fileDes, final HttpSimpleCallBack<M> callBack) {
+        uploadFile(context, url, filePath, fileDes, null, true, callBack);
     }
 
+    public <M> void uploadFile(Context context, String url, String filePath, String fileDes, Map<String, Object> queryMap, final HttpSimpleCallBack<M> callBack) {
+        uploadFile(context, url, filePath, fileDes, queryMap, false, callBack);
+    }
+
+    public <M> void uploadFileFullPath(Context context, String url, String filePath, String fileDes, Map<String, Object> queryMap, final HttpSimpleCallBack<M> callBack) {
+        uploadFile(context, url, filePath, fileDes, queryMap, true, callBack);
+    }
+
+    private <M> void uploadFile(Context context, String url, String filePath, String fileDes, Map<String, Object> queryMap, boolean isFullPath, final HttpSimpleCallBack<M> callBack) {
+        final File file = new File(filePath);
+        if (!file.exists()) {
+            return;
+        }
+        RequestBody description = RequestBody.create(MediaType.parse("multipart/form-data; charset=utf-8"), fileDes);
+//        RequestBody requestBody = UploadFileRequestBody.create(MediaType.parse("multipart/form-data"), file);
+        UploadFileRequestBody requestBody = new UploadFileRequestBody(file, new TransformProgressListener() {
+
+            @Override
+            public void onProgress(long progress, long total, boolean completed) {
+                if (completed) {
+                    progress = total;
+                }
+                callBack.onProgress(progress, total, completed);
+            }
+        });
+        MultipartBody.Part part = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
+        if (queryMap == null) {
+            queryMap = new HashMap<>();
+        }
+        if (isFullPath) {
+            request(context, mCommonApi.uploadFileFullPath(url, queryMap, description, part), callBack);
+        } else {
+            request(context, mCommonApi.uploadFile(url, queryMap, description, part), callBack);
+        }
+    }
+
+    public <M> void uploadFiles(Context context, String url, List<String> filePathList, final HttpSimpleCallBack<M> callBack) {
+        uploadFiles(context, url, filePathList, null, false, callBack);
+    }
+
+    public <M> void uploadFilesFullPath(Context context, String url, List<String> filePathList, final HttpSimpleCallBack<M> callBack) {
+        uploadFiles(context, url, filePathList, null, true, callBack);
+    }
+
+    public <M> void uploadFiles(Context context, String url, List<String> filePathList, Map<String, Object> queryMap, final HttpSimpleCallBack<M> callBack) {
+        uploadFiles(context, url, filePathList, queryMap, false, callBack);
+    }
+
+    public <M> void uploadFilesFullPath(Context context, String url, List<String> filePathList, Map<String, Object> queryMap, final HttpSimpleCallBack<M> callBack) {
+        uploadFiles(context, url, filePathList, queryMap, true, callBack);
+    }
 
     private long curUploadProgress = 0;
 
-    private <M> void uploadFiles(Context context, String url, List<String> filePathList, boolean isFullPath, final HttpSimpleCallBack<M> callBack) {
+    private <M> void uploadFiles(Context context, String url, List<String> filePathList, Map<String, Object> queryMap, boolean isFullPath, final HttpSimpleCallBack<M> callBack) {
         curUploadProgress = 0;
         if (filePathList == null || filePathList.size() == 0) {
             return;
@@ -184,15 +244,18 @@ public class CommonApiRequest {
                     if (completed) {
                         curUploadProgress += total;
                     }
-                    callBack.onProgress(curUploadProgress + (progress), finalTotalSize, curUploadProgress + (progress) == finalTotalSize);
+                    callBack.onProgress(completed ? curUploadProgress : (curUploadProgress + progress), finalTotalSize, curUploadProgress == finalTotalSize);
                 }
             });
             params.put("file[]\"; filename=\"" + file.getName(), body);
         }
+        if (queryMap == null) {
+            queryMap = new HashMap<>();
+        }
         if (isFullPath) {
-            request(context, mCommonApi.uploadFilesFullPath(url, params), callBack);
+            request(context, mCommonApi.uploadFilesFullPath(url, queryMap, params), callBack);
         } else {
-            request(context, mCommonApi.uploadFiles(url, params), callBack);
+            request(context, mCommonApi.uploadFiles(url, queryMap, params), callBack);
         }
     }
 
