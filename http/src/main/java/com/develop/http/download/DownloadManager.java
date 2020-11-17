@@ -54,7 +54,8 @@ public class DownloadManager {
 
     public void addDownloadInfo(DownloadInfo info) {
         info.setState(DownloadInfo.DOWNLOAD);
-        if (info == null || subscriberMap.get(info.getUrl()) != null) {
+        DownloadSubscriber downloadSubscriber = subscriberMap.get(info.getUrl());
+        if (downloadSubscriber != null && downloadSubscriber.isDownloading()) {
             subscriberMap.get(info.getUrl()).setDownloadInfo(info);
             return;
         }

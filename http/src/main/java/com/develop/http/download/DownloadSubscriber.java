@@ -79,4 +79,11 @@ public class DownloadSubscriber<T> extends Subscriber<T> implements TransformPro
                     });
         }
     }
+
+    public boolean isDownloading(){
+        if (downloadInfo != null && DownloadInfo.DOWNLOAD == downloadInfo.getState()) {
+            return true;
+        }
+        return false;
+    }
 }
