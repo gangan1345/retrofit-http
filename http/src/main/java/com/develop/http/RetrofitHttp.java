@@ -2,8 +2,6 @@ package com.develop.http;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-
 import com.develop.http.api.BaseUrl;
 import com.develop.http.api.CommonApi;
 import com.develop.http.api.CommonApiRequest;
@@ -19,6 +17,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.NonNull;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -46,6 +45,11 @@ public class RetrofitHttp {
     private HashMap<String, Object> mServiceMap = new HashMap<>();
     private CommonApiRequest mCommonApiRequest;
     private boolean mSslEnable;
+    /**
+     * 是否启用业务code 成功判断
+     * 例如 业务数据模型中的code返回0 代表成功， 那么失败的业务都会解析到 onFailed 回调监听
+     */
+    private boolean mSuccessCodeEnable = true;
 
     private volatile static RetrofitHttp mRetrofitHttp;
 
@@ -130,6 +134,18 @@ public class RetrofitHttp {
         return this;
     }
 
+
+    /**
+     * 是否启用业务code 成功判断
+     * 例如 业务数据模型中的code返回0 代表成功， 那么失败的业务都会解析到 onFailed 回调监听
+     * @param enable
+     * @return
+     */
+    public RetrofitHttp successCodeEnable(boolean enable) {
+        mSuccessCodeEnable = enable;
+        return this;
+    }
+
     /**
      * get base url
      * @return
@@ -140,6 +156,14 @@ public class RetrofitHttp {
             baseUrl = mHttpConfigBuilder.getBaseUrl();
         }
         return baseUrl;
+    }
+
+    /**
+     * get config
+     * @return
+     */
+    public HttpConfigBuilder getHttpConfigBuilder() {
+        return mHttpConfigBuilder;
     }
 
     /**
@@ -251,8 +275,11 @@ public class RetrofitHttp {
     public static class HttpResultFunc<T> implements Func1<AbsHttpResult<T>, T> {
         @Override
         public T call(AbsHttpResult<T> absHttpResult) {
-            if (!absHttpResult.isSuccess()) {
-                throw new AbsHttpExceptionHandle.ServerException(HttpErrorCode.CODE_FAILURE, "");
+            if (RetrofitHttp.get().mSuccessCodeEnable) {
+                // 启用了code判断，则不成功的统一返回失败
+                if (!absHttpResult.isSuccess()) {
+                    throw new AbsHttpExceptionHandle.ServerException(HttpErrorCode.CODE_FAILURE, absHttpResult.message);
+                }
             }
             return absHttpResult.getData();
         }
