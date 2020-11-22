@@ -6,6 +6,7 @@ import com.develop.http.api.BaseUrl;
 import com.develop.http.api.CommonApi;
 import com.develop.http.api.CommonApiRequest;
 import com.develop.http.callback.HttpCallBack;
+import com.develop.http.callback.HttpHandleExceptionListener;
 import com.develop.http.callback.HttpParamsInterface;
 import com.develop.http.interceptor.HttpCommonParamInterceptor;
 import com.develop.http.interceptor.HttpLogInterceptor;
@@ -50,6 +51,11 @@ public class RetrofitHttp {
      * 例如 业务数据模型中的code返回0 代表成功， 那么失败的业务都会解析到 onFailed 回调监听
      */
     private boolean mSuccessCodeEnable = true;
+
+    /**
+     * 自定义解析异常处理
+     */
+    private HttpHandleExceptionListener mHandleException;
 
     private volatile static RetrofitHttp mRetrofitHttp;
 
@@ -147,6 +153,16 @@ public class RetrofitHttp {
     }
 
     /**
+     * 自定义解析异常
+     * @param handleExceptionListener
+     * @return
+     */
+    public RetrofitHttp handleException(HttpHandleExceptionListener handleExceptionListener) {
+        mHandleException = handleExceptionListener;
+        return this;
+    }
+
+    /**
      * get base url
      * @return
      */
@@ -164,6 +180,14 @@ public class RetrofitHttp {
      */
     public HttpConfigBuilder getHttpConfigBuilder() {
         return mHttpConfigBuilder;
+    }
+
+    /**
+     * handle exception
+     * @return
+     */
+    public HttpHandleExceptionListener getHandleException() {
+        return mHandleException;
     }
 
     /**
@@ -278,7 +302,7 @@ public class RetrofitHttp {
             if (RetrofitHttp.get().mSuccessCodeEnable) {
                 // 启用了code判断，则不成功的统一返回失败
                 if (!absHttpResult.isSuccess()) {
-                    throw new AbsHttpExceptionHandle.ServerException(HttpErrorCode.CODE_FAILURE, absHttpResult.message);
+                    throw new AbsHttpExceptionHandle.ServerException(absHttpResult.getCode(), absHttpResult.getMessage());
                 }
             }
             return absHttpResult.getData();

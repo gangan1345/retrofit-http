@@ -1,6 +1,10 @@
 package com.develop.http;
 
 
+import android.text.TextUtils;
+
+import com.develop.http.callback.HttpHandleExceptionListener;
+
 /**
  * HTTP返回code基类
  * @author Angus
@@ -21,6 +25,13 @@ public class HttpErrorCode {
 
 
 	public static String getCodeMessage(int code){
+		HttpHandleExceptionListener listener = RetrofitHttp.get().getHandleException();
+		if (listener != null) {
+			String msg = listener.getCodeMessage(code);
+			if (!TextUtils.isEmpty(msg)) {
+				return msg;
+			}
+		}
 		String message = "未知错误";
 		switch (code) {
 			case CODE_NO_NETWORK:
@@ -34,5 +45,16 @@ public class HttpErrorCode {
 				break;
 		}
 		return message;
+	}
+
+	public static String getDefaultErrorMessage(){
+		HttpHandleExceptionListener listener = RetrofitHttp.get().getHandleException();
+		if (listener != null) {
+			String msg = listener.getDefaultErrorMessage();
+			if (!TextUtils.isEmpty(msg)) {
+				return msg;
+			}
+		}
+		return "网络异常，请稍后重试";
 	}
 }

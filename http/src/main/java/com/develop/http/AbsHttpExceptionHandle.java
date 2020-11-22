@@ -1,5 +1,6 @@
 package com.develop.http;
 
+import com.develop.http.callback.HttpHandleExceptionListener;
 import com.develop.http.utils.LogUtils;
 import com.google.gson.JsonParseException;
 
@@ -27,8 +28,15 @@ public class AbsHttpExceptionHandle {
     private static final int GATEWAY_TIMEOUT = 504;
 
     public static ResponeThrowable handleException(Throwable e) {
-        String message = e.getClass().getCanonicalName() + "，" + (null != e.getMessage() ? e.getMessage() : "");
-        String defaultMsg = "网络异常，请稍后重试";
+        HttpHandleExceptionListener listener = RetrofitHttp.get().getHandleException();
+        if (listener != null){
+            ResponeThrowable lr = listener.handleException(e);
+            if (lr != null) {
+                LogUtils.e("http exception response-->" +e.getClass().getCanonicalName()+ "["+lr.code+"] " + lr.message);
+                return lr;
+            }
+        }
+        String defaultMsg = HttpErrorCode.getDefaultErrorMessage();
         ResponeThrowable ex;
         if (e instanceof HttpException) {
             HttpException httpException = (HttpException) e;
@@ -46,12 +54,10 @@ public class AbsHttpExceptionHandle {
                     ex.message = defaultMsg;
                     break;
             }
-            message = "["+httpException.code()+"]" + message;
         } else if (e instanceof ServerException) {
             ServerException resultException = (ServerException) e;
             ex = new ResponeThrowable(resultException, resultException.code);
             ex.message = resultException.message;
-            message = "["+resultException.code+"]" + message;
         } else if (e instanceof ConnectException || e instanceof SocketException) {
             ex = new ResponeThrowable(e, HttpErrorCode.CODE_NO_NETWORK, HttpErrorCode.getCodeMessage(HttpErrorCode.CODE_NO_NETWORK));
         } else if (e instanceof java.net.SocketTimeoutException || e instanceof ConnectTimeoutException) {
@@ -62,7 +68,7 @@ public class AbsHttpExceptionHandle {
             ex = new ResponeThrowable(e, HttpErrorCode.CODE_FAILURE);
             ex.message = defaultMsg;
         }
-        LogUtils.e("http exception response-->" + message);
+        LogUtils.e("http exception response-->" +e.getClass().getCanonicalName()+ "["+ex.code+"] " + ex.message);
         return ex;
     }
 
