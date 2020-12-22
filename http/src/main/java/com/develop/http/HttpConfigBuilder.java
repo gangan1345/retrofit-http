@@ -12,9 +12,8 @@ import java.util.Map;
  */
 public class HttpConfigBuilder {
     private Context context;
-    private String baseUrl;
-    private Map<String, String> headers;
-    private Map<String, Object> params;
+
+    private HttpParamsInterface mHttpConfigInterface;
 
     public static HttpConfigBuilder builder(Context context){
         return new HttpConfigBuilder().context(context);
@@ -25,25 +24,8 @@ public class HttpConfigBuilder {
         return this;
     }
 
-    public HttpConfigBuilder baseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-        return this;
-    }
-
-    public HttpConfigBuilder headers(Map<String, String> headers) {
-        this.headers = headers;
-        return this;
-    }
-
-    public HttpConfigBuilder params(Map<String, Object> params) {
-        this.params = params;
-        return this;
-    }
-
     public HttpConfigBuilder config(HttpParamsInterface mHttpConfigInterface) {
-        baseUrl(mHttpConfigInterface.getBaseUrl());
-        headers(mHttpConfigInterface.getHeaders());
-        params(mHttpConfigInterface.getParams());
+        this.mHttpConfigInterface = mHttpConfigInterface;
         return this;
     }
 
@@ -52,14 +34,23 @@ public class HttpConfigBuilder {
     }
 
     public String getBaseUrl() {
-        return baseUrl;
+        if (mHttpConfigInterface != null) {
+            return mHttpConfigInterface.getBaseUrl();
+        }
+        return null;
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        if (mHttpConfigInterface != null) {
+            return mHttpConfigInterface.getHeaders();
+        }
+        return null;
     }
 
     public Map<String, Object> getParams() {
-        return params;
+        if (mHttpConfigInterface != null) {
+            return mHttpConfigInterface.getParams();
+        }
+        return null;
     }
 }
