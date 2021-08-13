@@ -18,7 +18,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -362,7 +361,7 @@ public class RetrofitHttp {
      * @param <M>
      * @return
      */
-    public static <T extends AbsHttpResult<M>, M> Request request(@NonNull Observable<T> observable, HttpCallBack<M> callBack){
+    public static <T extends AbsHttpResult<M>, M> Request request(Observable<T> observable, HttpCallBack<M> callBack){
         return Request.request(observable, callBack);
     }
 
@@ -373,7 +372,7 @@ public class RetrofitHttp {
      * @param <M>
      * @return
      */
-    public static <M> Request requestR(@NonNull Observable<M> observable, HttpCallBack<M> callBack){
+    public static <M> Request requestR(Observable<M> observable, HttpCallBack<M> callBack){
         return Request.requestR(observable, callBack);
     }
 

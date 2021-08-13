@@ -1,7 +1,5 @@
 package com.develop.http;
 
-import androidx.annotation.NonNull;
-
 import com.develop.http.callback.HttpCallBack;
 import com.develop.http.utils.LogUtils;
 
@@ -29,11 +27,11 @@ public class Request<M> {
         mCallBack = callBack;
     }
 
-    public static <T extends AbsHttpResult<M>, M> Request request(@NonNull Observable<T> observable, HttpCallBack<M> callBack){
+    public static <T extends AbsHttpResult<M>, M> Request request(Observable<T> observable, HttpCallBack<M> callBack){
         return new Request(observable, callBack).execute();
     }
 
-    public static <M> Request requestR(@NonNull Observable<M> observable, HttpCallBack<M> callBack){
+    public static <M> Request requestR(Observable<M> observable, HttpCallBack<M> callBack){
         return new Request(observable, callBack).executeR();
     }
 
